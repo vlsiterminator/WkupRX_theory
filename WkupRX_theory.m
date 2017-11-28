@@ -1,52 +1,30 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 %Version: V0.4
-=======
-%Version: V0.1
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
-=======
-%Version: V0.1
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       V0.1: a) Change the the relation between RF_ontime and BW to
 %       BW=ones/RF_ontime. b) Differentiate the RF BW and digital BW,only  the
 %       latter is related to oversampling
-<<<<<<< HEAD
-<<<<<<< HEAD
 %       V0.2: a) Updated Calc_Falsewkup with considering tolerating false
 %       negatives(Effect is small). b) Add err_tol_mode to differentiate
 %       false postive and false negative error tolerance
 %       V0.3: Change to log scale figures
-%       V0.4: 
-=======
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
-=======
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
+%       V0.4: Add two surf figures with shift represents the color
 %The time domain equation at the output of RFFE is V(t)=Vrf(t)+Vn(t). The
 %motivation of wkup rx is to reduce the RF input power (Increase sensitivity).
-shift=0.001; %The shift value is the central of gaussian distribution with RF signal, which is decided by the RF power and amplifier gain
+shift=0.0018; %The shift value is the central of gaussian distribution with RF signal, which is decided by the RF power and amplifier gain
 % shift=0.0036; %-77dbm
 shift_range=linspace(0.002,0.0009,10);
 sigma=0.00042; %Sigma at 200hz, sigma is proportional to the sqrt of bandwidth, Vn=sqrt(4kT*Bw*R)
-over_samp = 1;
+over_samp = 2;
 %Assume the RF on time is 1 second, then the code length decides the clock frequency
-RF_ontime = 0.08;
+RF_ontime = 0.12;
 target_falsewkup = 0.5; %Number of false wkup in an hour
-<<<<<<< HEAD
-<<<<<<< HEAD
 target_misswkup = 0.02; 
 %err_tol_mode = 1 is the mode doesn't differentiate fn and fp,
 %err_tol_mode = 0 is the mode defines fn and fp separately
 err_tol_mode = 1;
-err_tol = 1;
+err_tol = 0;
 err_tol_fn = 0;
 err_tol_fp = err_tol - err_tol_fn;
-=======
-err_tol = 2;
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
-=======
-err_tol = 2;
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
 code_length_min = 4;
 code_length_max = 33;
 code_weight = 0.7;
@@ -63,8 +41,6 @@ figure
 plot(Vtrip,code_8_4_pfp);
 hold on;
 plot(Vtrip,code_8_4_pfn);
-<<<<<<< HEAD
-<<<<<<< HEAD
 legend('False positvie prob','False negative prob');
 xlabel('Vtrip(V)');
 ylabel('Probability');
@@ -74,18 +50,6 @@ semilogy(Vtrip,code_8_4_falsewkup);
 code_8_4_misswkup = Calc_Misswkup(code_8_4(1),code_8_4(2),code_8_4_pfp,code_8_4_pfn,err_tol_mode,err_tol,err_tol_fp,err_tol_fn);
 xlabel('Vtrip(V)');
 ylabel('False wkup in an hour');
-=======
-code_8_4_falsewkup = Calc_Falsewkup(code_8_4(1),code_8_4(2),code_8_4(3)*over_samp,code_8_4_pfp,err_tol);
-figure
-semilogy(Vtrip,code_8_4_falsewkup);
-code_8_4_misswkup = Calc_Misswkup(code_8_4(1),code_8_4(2),code_8_4_pfp,code_8_4_pfn,err_tol);
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
-=======
-code_8_4_falsewkup = Calc_Falsewkup(code_8_4(1),code_8_4(2),code_8_4(3)*over_samp,code_8_4_pfp,err_tol);
-figure
-semilogy(Vtrip,code_8_4_falsewkup);
-code_8_4_misswkup = Calc_Misswkup(code_8_4(1),code_8_4(2),code_8_4_pfp,code_8_4_pfn,err_tol);
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
 figure
 semilogy(Vtrip,code_8_4_misswkup);
 xlabel('Vtrip(V)');
@@ -94,13 +58,14 @@ ylabel('Probability of missing detection');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Q1: The effect of RF power (Code weight) on sensitivity (Prob of missing wkup) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+err_tol_mode = 1;
 code_misswkup_min_Q1=ones(code_length_max,code_length_max);
 code_Vtrip_opt_Q1=ones(code_length_max,code_length_max);
 for code_length = code_length_min:code_length_max
     % Sweep ones_count from err_tol+1 to code_length-err_tol-1 because
     % false wkup prob is 1 when ones <= err_tol, miss wkup prob is 1 when
     % there is enveloped interference
-    for ones_count = (1+err_tol):(code_length-err_tol-1) 
+    for ones_count = (2+err_tol):(code_length-err_tol-1) 
         code_bandwidth_rf = ones_count/RF_ontime;
         code_bandwidth_dig = code_bandwidth_rf*over_samp;
         code_sigma = sqrt(code_bandwidth_rf/200)*sigma;
@@ -111,7 +76,7 @@ for code_length = code_length_min:code_length_max
         for Vtrip_i = linspace(Vtrip_num,1,Vtrip_num)
             Vtrip_lowerb = Vtrip_num;
             Satisfy_falsewkup = false;
-            if(Calc_Falsewkup(code_length,ones_count,code_bandwidth_rf,code_pfp(Vtrip_i),err_tol) > target_falsewkup)
+            if(Calc_Falsewkup(code_length,ones_count,code_bandwidth_dig,code_pfp(Vtrip_i),err_tol_mode,err_tol,err_tol_fp,err_tol_fn) > target_falsewkup)
                 Satisfy_falsewkup = true;
                 if (Vtrip_i == Vtrip_num) %Vtrip_lowerb is the right most Vtrip_i that satifies <= target_falsewkup
                     Vtrip_lowerb = Vtrip_num;
@@ -129,7 +94,7 @@ for code_length = code_length_min:code_length_max
             Vtrip_i = linspace(Vtrip_lowerb,Vtrip_num,Vtrip_num-Vtrip_lowerb+1);
             %Find the min missing wkup prob and the index
             [code_misswkup_min_Q1(ones_count,code_length),Vtrip_opt_ind]...
-                = min(Calc_Misswkup(code_length,ones_count,code_pfp(Vtrip_i),code_pfn(Vtrip_i),err_tol));
+                = min(Calc_Misswkup(code_length,ones_count,code_pfp(Vtrip_i),code_pfn(Vtrip_i),err_tol_mode,err_tol,err_tol_fp,err_tol_fn));
             code_Vtrip_opt_Q1(ones_count,code_length) = Vtrip(Vtrip_lowerb+Vtrip_opt_ind-1);
         end
                 
@@ -159,8 +124,6 @@ colorbar('FontSize',11,'YTick',log10(c),'YTickLabel',c);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-<<<<<<< HEAD
-<<<<<<< HEAD
 %Q1b: The effect of RF power (Code weight) on sensitivity (Prob of missing wkup) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 err_tol_mode = 0;
@@ -170,7 +133,7 @@ for code_length = code_length_min:code_length_max
     % Sweep ones_count from err_tol_fn+1 to code_length-err_tol_fp-1 because
     % false wkup prob is 1 when ones <= err_tol_fn, miss wkup prob is 1 when
     % there is enveloped interference
-    for ones_count = (1+err_tol_fn):(code_length-err_tol_fp-1) 
+    for ones_count = (2+err_tol_fn):(code_length-err_tol_fp-1) 
         code_bandwidth_rf = ones_count/RF_ontime;
         code_bandwidth_dig = code_bandwidth_rf*over_samp;
         code_sigma = sqrt(code_bandwidth_rf/200)*sigma;
@@ -227,23 +190,12 @@ colorbar('FontSize',11,'YTick',log10(c),'YTickLabel',c);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-=======
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
-=======
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
 %Q2: The effect of digital power (Varying code length with fixed code weight)
 %on sensitivity (Prob of missing wkup) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Code weight is fixed for the same RFFE power
-<<<<<<< HEAD
-<<<<<<< HEAD
 err_tol_mode = 1;
 code_weight_Q2 = code_weight;
-=======
-=======
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
-code_weight_Q2 = 0.7;
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
 code_misswkup_min_Q2=ones(code_length_max,code_length_max);
 code_Vtrip_opt_Q2=ones(code_length_max,code_length_max);
 for code_length = code_length_min:code_length_max
@@ -253,7 +205,8 @@ for code_length = code_length_min:code_length_max
     % false wkup prob is 1 when ones <= err_tol
     
     for err_tol_Q2 = (0):(ones_count-1)
-        code_bandwidth_rf = code_length*over_samp/RF_ontime;
+        code_bandwidth_rf = ones_count/RF_ontime;
+        code_bandwidth_dig = code_bandwidth_rf*over_samp;
         code_sigma = sqrt(code_bandwidth_rf/200)*sigma;
         code_pfp = 1 - Calc_CDF(Vtrip, code_sigma, 0);
         code_pfn = Calc_CDF(Vtrip, code_sigma, shift);
@@ -262,7 +215,7 @@ for code_length = code_length_min:code_length_max
         for Vtrip_i = linspace(Vtrip_num,1,Vtrip_num)
             Vtrip_lowerb = Vtrip_num;
             Satisfy_falsewkup = false;
-            if(Calc_Falsewkup(code_length,ones_count,code_bandwidth_rf,code_pfp(Vtrip_i),err_tol_Q2) > target_falsewkup)
+            if(Calc_Falsewkup(code_length,ones_count,code_bandwidth_dig,code_pfp(Vtrip_i),err_tol_mode,err_tol_Q2,err_tol_fp,err_tol_fn) > target_falsewkup)
                 Satisfy_falsewkup = true;
                 if (Vtrip_i == Vtrip_num) %Vtrip_lowerb is the right most Vtrip_i that satifies <= target_falsewkup
                     Vtrip_lowerb = Vtrip_num;
@@ -280,7 +233,7 @@ for code_length = code_length_min:code_length_max
             Vtrip_i = linspace(Vtrip_lowerb,Vtrip_num,Vtrip_num-Vtrip_lowerb+1);
             %Find the min missing wkup prob and the index
             [code_misswkup_min_Q2(err_tol_Q2+1,code_length),Vtrip_opt_ind]...
-                = min(Calc_Misswkup(code_length,ones_count,code_pfp(Vtrip_i),code_pfn(Vtrip_i),err_tol_Q2));
+                = min(Calc_Misswkup(code_length,ones_count,code_pfp(Vtrip_i),code_pfn(Vtrip_i),err_tol_mode,err_tol_Q2,err_tol_fp,err_tol_fn));
             code_Vtrip_opt_Q2(err_tol_Q2+1,code_length) = Vtrip(Vtrip_lowerb+Vtrip_opt_ind-1);
         end
                 
@@ -306,8 +259,6 @@ colorbar('FontSize',11,'YTick',log10(c),'YTickLabel',c);
 %End Q2: The effect of digital power (Varying code length with fixed code weight)
 %on sensitivity (Prob of missing wkup) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -393,7 +344,7 @@ for shift_Q3 = shift_range
         % Sweep ones_count from err_tol+1 to code_length-err_tol-1 because
         % false wkup prob is 1 when ones <= err_tol, miss wkup prob is 1 when
         % there is enveloped interference
-        for ones_count = (1+err_tol):(code_length-err_tol-1) 
+        for ones_count = (2+err_tol):(code_length-err_tol-1) 
             code_bandwidth_rf = ones_count/RF_ontime;
             code_bandwidth_dig = code_bandwidth_rf*over_samp;
             code_sigma = sqrt(code_bandwidth_rf/200)*sigma;
@@ -527,7 +478,3 @@ colorbar;
 %End Q4: The effect of digital power (Varying code length with fixed code weight)
 %on minimal sensitivity (shift)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-=======
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
-=======
->>>>>>> parent of 9df8521... V0.2 Add err_tol_mode
