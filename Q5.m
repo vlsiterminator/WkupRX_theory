@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Q5: The effect of err tolerance (err_mode = 1 and err_mode = 0) with fixed
+%Q5: The effect of err tolerance (err_mode = 1) with fixed
 %code length on minimal sensitivity (shift)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -57,8 +57,8 @@ figure
 surf(X,Y,shift_min_Q5);
 colormap hot
 title({['Minimal shift value with false wakeup <' num2str(target_falsewkup) ' {} in an hour,'];...
-    ['Missing detection rate <' num2str(target_misswkup)];...
-    ['RF on time = ' num2str(RF_ontime) '(s), Code length = ' num2str(code_length_Q5-1)]});
+    ['Missing detection rate <' num2str(target_misswkup) 'err_tol_mode = ' num2str(err_tol_mode)];...
+    ['RF on time = ' num2str(RF_ontime) '(s), Code length = ' num2str(code_length_Q5)]});
 xlabel('Number of ''1''s ');
 ylabel('Error tolerance bit(s)');
 xlim([1,code_length_Q5]);

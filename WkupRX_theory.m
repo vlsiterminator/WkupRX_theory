@@ -1,4 +1,4 @@
-%Version: V0.5
+%Version: V0.6
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       V0.1: a) Change the the relation between RF_ontime and BW to
 %       BW=ones/RF_ontime. b) Differentiate the RF BW and digital BW,only  the
@@ -9,6 +9,7 @@
 %       V0.3: Change to log scale figures
 %       V0.4: Add two surf figures with shift represents the color
 %       V0.5: Reconfigured the code
+%       V0.6: Add fix code length analysis and sweep the err_tol
 %       gives the min shift.
 %       To do: 1) fix the code length and explore the other knobs that
 %       gives the min shift. 2) For each code bit, use a statistical method
@@ -136,7 +137,7 @@ Q4(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Q5: The effect of err tolerance (err_mode = 1 and err_mode = 0) with fixed
+%Q5: The effect of err tolerance (err_mode = 1) with fixed
 %code length on minimal sensitivity (shift)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Code weight is fixed for the same RFFE power
@@ -147,6 +148,20 @@ code_length_Q5 = 8;
 shift_min_Q5_8 = Q5(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol,err_tol_fn,err_tol_fp,code_length_Q5);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%End Q5: The effect of err tolerance (err_mode = 1 and err_mode = 0) with fixed
+%End Q5: The effect of err tolerance (err_mode = 1) with fixed
 %code length on minimal sensitivity (shift)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Q5b: The effect of err tolerance (err_mode = 0) with fixed
+%code length on minimal sensitivity (shift). Loop between the number of
+%err_tol_fn and err_tol_fn in a certain err_tol
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+code_length_Q5b = 15;
+shift_min_Q5b_15 = Q5b(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,code_length_Q5b);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%End Q5b: The effect of err tolerance (err_mode = 0) with fixed
+%code length on minimal sensitivity (shift). Loop between the number of
+%err_tol_fn and err_tol_fn in a certain err_tol
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
