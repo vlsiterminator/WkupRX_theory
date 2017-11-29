@@ -7,7 +7,7 @@ function r=Calc_Misswkup(code_length,ones,pfp,pfn,err_tol_mode,err_tol,err_tol_f
 %                    -(1-pfp)^5*pfp^2*nchoosek(7,2)*(1-pfn)^7*pfn^1*nchoosek(8,1)... %prob of 2 fp and 1fn
 %                    -(1-pfp)^6*pfp^1*nchoosek(7,1)*(1-pfn)^6*pfn^2*nchoosek(8,2)... %prob of 1 fp and 2fn
 %                    ;
-r=1+10^-12;
+r=1+10;
 if (err_tol_mode == 1) %error tolerance mode 1
     if (err_tol >= ones)
         r=0;
