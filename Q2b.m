@@ -16,9 +16,10 @@ for code_length = code_length_min:code_length_max
     % Number of ones is decided by the code weight and code length
     ones_count = floor(code_length*code_weight_Q2); 
     % Sweep error_tol_Q2 from 0 to ones_count-1 because
-    % false wkup prob is 1 when ones <= err_tol
+    % false wkup prob is 1 when ones <= err_tol+1 and an occasional
+        % false 1
     
-    for err_tol_fn_Q2b = (0):(ones_count-1)
+    for err_tol_fn_Q2b = (0):(ones_count-2)
         code_bandwidth_rf = ones_count/RF_ontime;
         code_bandwidth_dig = code_bandwidth_rf*over_samp;
         code_sigma = sqrt(code_bandwidth_rf/200)*sigma;

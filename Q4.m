@@ -13,10 +13,11 @@ for shift_Q4 = shift_range
     for code_length = code_length_min:code_length_max
         % Number of ones is decided by the code weight and code length
         ones_count = floor(code_length*code_weight_Q4); 
-        % Sweep error_tol_Q2 from 0 to ones_count-1 because
-        % false wkup prob is 1 when ones <= err_tol
+        % Sweep error_tol_Q2 from 0 to ones_count-2 because
+        % false wkup prob is 1 when ones <= err_tol+1 and an occasional
+        % false 1
 
-        for err_tol_Q4 = (0):(ones_count-1)
+        for err_tol_Q4 = (0):(ones_count-2)
             code_bandwidth_rf = ones_count/RF_ontime;
             code_bandwidth_dig = code_bandwidth_rf*over_samp;
             code_sigma = sqrt(code_bandwidth_rf/200)*sigma;
@@ -70,5 +71,5 @@ ylim([0,floor(code_length_max*code_weight_Q4)]);
 view(2);
 caxis([min(shift_range) max(shift_range)]);
 colorbar;
-
+r = shift_min_Q4;
 end
