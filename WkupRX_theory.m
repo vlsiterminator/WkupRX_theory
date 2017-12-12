@@ -12,14 +12,10 @@
 %       V0.6: Add fix code length analysis and sweep the err_tol
 %       gives the min shift.
 %       V0.7: a) Update bruteforce sweeping on code_length, ones_count, err_tol, err_tol_fn, err_tol_fp in
-%       err_tol_mode = 1 (Q3b) and in err_tol_mode = 0 (Q3c). b) Update bruteforce sweeping on 
-%       ones_count, err_tol, err_tol_fn, err_tol_fp in
-%       err_tol_mode = 1 (Q5) and in err_tol_mode = 0 (Q5b)
-%       To do: 1) fix the code length and explore the other knobs that
-%       gives the min shift. 2) (No improvement) For each code bit, use a statistical method
-%       of N sub-bits to justify if it's a 0 or 1, and then use the current
-%       analysis. 3) (No improvement) Compare the prob of miss dectection between double the
-%       RF ontime for two detections and double the time for each bit
+%       V0.8: a) Fix a bug in Q3 to Q7 for sweeping the Vtrip when all the
+%       Vtrips satisfy the false wake-up rate criterial.
+%       V0.9: a) Added Q8 a, b ,c, which are the minimal shift value with
+%       fixed false postive rate.
 %The time domain equation at the output of RFFE is V(t)=Vrf(t)+Vn(t). The
 %motivation of wkup rx is to reduce the RF input power (Increase sensitivity).
 shift=0.0018; %The shift value is the central of gaussian distribution with RF signal, which is decided by the RF power and amplifier gain
@@ -31,6 +27,7 @@ over_samp = 2;
 RF_ontime = 0.04;
 target_falsewkup = 0.5; %Number of false wkup in an hour
 target_misswkup = 0.02; 
+target_pfp = 0.01;
 %err_tol_mode = 1 is the mode doesn't differentiate fn and fp,
 %err_tol_mode = 0 is the mode defines fn and fp separately
 err_tol_mode = 1;
@@ -49,8 +46,8 @@ close all
 %Q0: Plot the 1)Vtrip vs CDF, 2)Vtrip vs Pfn,Pfp, 3)Vtrip vs false wkup rate
 %4) Vtrip vs miss detection rate with given code_length, ones, err_tol_mode, err_tol
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-code_length_Q0 = 8;
-ones_count_Q0 = 4;
+code_length_Q0 = 31;
+ones_count_Q0 = 21;
 Q0(Vtrip,Vtrip_num,sigma,shift,over_samp,RF_ontime,code_length_Q0,ones_count_Q0,err_tol_mode,err_tol,err_tol_fp,err_tol_fn);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %End Q0: Plot the 1)Vtrip vs CDF, 2)Vtrip vs Pfn,Pfp, 3)Vtrip vs false wkup rate
@@ -148,7 +145,7 @@ shift_min_Q3c=Q3c(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_f
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Code weight is fixed for the same RFFE power
 
-shift_min_Q4 = Q4(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol,err_tol_fn,err_tol_fp,code_length_min,code_length_max,code_weight);
+[shift_min_Q4,Vtrip_shift_min_Q4] = Q4(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol_fn,err_tol_fp,code_length_min,code_length_max,code_weight);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %End Q4: The effect of digital power (Varying code length with fixed code weight)
@@ -161,10 +158,13 @@ shift_min_Q4 = Q4(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_f
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Code weight is fixed for the same RFFE power
 code_length_Q5 = 15;
-shift_min_Q5_15 = Q5(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol,err_tol_fn,err_tol_fp,code_length_Q5);
+shift_min_Q5_15 = Q5(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol_fn,err_tol_fp,code_length_Q5);
 
 code_length_Q5 = 8;
-shift_min_Q5_8 = Q5(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol,err_tol_fn,err_tol_fp,code_length_Q5);
+shift_min_Q5_8 = Q5(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol_fn,err_tol_fp,code_length_Q5);
+
+code_length_Q5 = 31;
+shift_min_Q5_31 = Q5(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol_fn,err_tol_fp,code_length_Q5);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %End Q5: The effect of err tolerance (err_mode = 1) with fixed
@@ -176,6 +176,9 @@ shift_min_Q5_8 = Q5(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target
 %code length on minimal sensitivity (shift). Loop between the number of
 %err_tol_fn and err_tol_fn in a certain err_tol
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+code_length_Q5b = 8;
+shift_min_Q5b_8 = Q5b(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,code_length_Q5b);
+
 code_length_Q5b = 15;
 shift_min_Q5b_15 = Q5b(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,code_length_Q5b);
 
@@ -210,4 +213,37 @@ shift_min_Q5b_31 = Q5b(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,tar
 % rep_factor=1;
 % Q7(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol,err_tol_fn,err_tol_fp,code_length,rep_factor);
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Q8: The Minimal shift with the targeted false postive rate (Fix error tolerance)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+[shift_min_Q8,Vtrip_shift_min_Q8]=Q8(Vtrip,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,target_pfp,err_tol,err_tol_fn,err_tol_fp,code_length_min,code_length_max);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%End Q8: The Minimal shift with the targeted false postive rate (Fix error tolerance)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Q8b: With targeted false postive rate, Sweep err_tol from 0 to ones-2, and get the Minimal shift that satisfies 
+%the target false wkup per hour and missing detection rate (err_tol_mode =1)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[shift_min_Q8b,Vtrip_shift_min_Q8b]=Q8b(Vtrip,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,target_pfp,code_length_min,code_length_max);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%End Q8b: With targeted false postive rate, Sweep err_tol from 0 to ones-2, and get the Minimal shift that satisfies 
+%the target false wkup per hour and missing detection rate (err_tol_mode =1)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Q8c:  With targeted false postive rate, Sweep err_tol_fn from 0 to ones-2, sweep err_tol_fp from 0 to code_length-ones-1
+%and get the Minimal shift that satisfies 
+%the target false wkup per hour and missing detection rate (err_tol_mode =0)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[shift_min_Q8c,Vtrip_shift_min_Q8c]=Q8c(Vtrip,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,target_pfp,code_length_min,code_length_max);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%End Q8c:  With targeted false postive rate, Sweep err_tol_fn from 0 to ones-2, sweep err_tol_fp from 0 to code_length-ones-1
+%and get the Minimal shift that satisfies 
+%the target false wkup per hour and missing detection rate (err_tol_mode =0)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

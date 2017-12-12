@@ -23,17 +23,14 @@ for shift = shift_range
             for err_tol = (0):(ones_count-2)
                 %Start from the highest Vtrip, and find the range of (Vtrip_i,Vtrip_max) that
                 %meets the false wkup target in an hour
+                Satisfy_falsewkup = false;
+                Vtrip_lowerb = Vtrip_num;
                 for Vtrip_i = linspace(Vtrip_num,1,Vtrip_num)
-                    Vtrip_lowerb = Vtrip_num;
-                    Satisfy_falsewkup = false;
                     if(Calc_Falsewkup(code_length,ones_count,code_bandwidth_dig,code_pfp(Vtrip_i),err_tol_mode,err_tol,err_tol_fp,err_tol_fn) > target_falsewkup)
-                        Satisfy_falsewkup = true;
-                        if (Vtrip_i == Vtrip_num) %Vtrip_lowerb is the right most Vtrip_i that satifies <= target_falsewkup
-                            Vtrip_lowerb = Vtrip_num;
-                        else
-                            Vtrip_lowerb = Vtrip_i + 1; %Vtrip_i fails target falsewkup, so use Vtrip_i + 1
-                        end
                         break
+                    else
+                        Satisfy_falsewkup = true;
+                        Vtrip_lowerb = Vtrip_i;
                     end
                 end
                 % Calculate the miss wkup prob if only satisfying the false wkup

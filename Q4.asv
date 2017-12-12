@@ -1,23 +1,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Q3: The Minimal shift that satisfies the target false wkup per hour and
-%missing detection rate (Fix error tolerance)
+%Q4: The effect of digital power (Varying code length with fixed code weight)
+%on minimal sensitivity (shift)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Code weight is fixed for the same RFFE power
 
-function r=Q3(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol,err_tol_fn,err_tol_fp,code_length_min,code_length_max,code_weight)
+function r=Q4(Vtrip,Vtrip_num,shift_range,sigma,over_samp,RF_ontime,target_falsewkup,target_misswkup,err_tol,err_tol_fn,err_tol_fp,code_length_min,code_length_max,code_weight)
 
 err_tol_mode = 1;
-shift_min_Q3=ones(code_length_max,code_length_max);
-for shift_Q3 = shift_range
+code_weight_Q4 = code_weight;
+shift_min_Q4=ones(code_length_max,code_length_max);
+for shift_Q4 = shift_range
     for code_length = code_length_min:code_length_max
-        % Sweep ones_count from err_tol+1 to code_length-err_tol-1 because
-        % false wkup prob is 1 when ones <= err_tol, miss wkup prob is 1 when
-        % there is enveloped interference
-        for ones_count = (2+err_tol):(code_length-err_tol-1) 
+        % Number of ones is decided by the code weight and code length
+        ones_count = floor(code_length*code_weight_Q4); 
+        % Sweep error_tol_Q2 from 0 to ones_count-2 because
+        % false wkup prob is 1 when ones <= err_tol+1 and an occasional
+        % false 1
+
+        for err_tol_Q4 = (0):(ones_count-2)
             code_bandwidth_rf = ones_count/RF_ontime;
             code_bandwidth_dig = code_bandwidth_rf*over_samp;
             code_sigma = sqrt(code_bandwidth_rf/200)*sigma;
             code_pfp = 1 - Calc_CDF(Vtrip, code_sigma, 0);
-            code_pfn = Calc_CDF(Vtrip, code_sigma, shift_Q3);
+            code_pfn = Calc_CDF(Vtrip, code_sigma, shift_Q4);
             %Start from the highest Vtrip, and find the range of (Vtrip_i,Vtrip_max) that
             %meets the false wkup target in an hour
             Satisfy_falsewkup = false;
@@ -37,9 +42,9 @@ for shift_Q3 = shift_range
                 %(Vtrip_lowerb,Vtrip_max), and find the minimum
                 Vtrip_i = linspace(Vtrip_lowerb,Vtrip_num,Vtrip_num-Vtrip_lowerb+1);
                 %Find the min missing wkup prob and the index
-                curr_misswkup = min(Calc_Misswkup(code_length,ones_count,code_pfp(Vtrip_i),code_pfn(Vtrip_i),err_tol_mode,err_tol,err_tol_fp,err_tol_fn));
+                curr_misswkup = min(Calc_Misswkup(code_length,ones_count,code_pfp(Vtrip_i),code_pfn(Vtrip_i),err_tol_mode,err_tol_Q4,err_tol_fp,err_tol_fn));
                 if curr_misswkup < target_misswkup       
-                    shift_min_Q3(ones_count,code_length) = shift_Q3;
+                    shift_min_Q4(err_tol_Q4+1,code_length) = shift_Q4;
                 end
             end
 
@@ -48,21 +53,20 @@ for shift_Q3 = shift_range
 end
 %%Plot the color map figure by sweeping the code length
 x = linspace(1,code_length_max,code_length_max);
-y = linspace(1,code_length_max,code_length_max);
+y = linspace(0,code_length_max-1,code_length_max); %y from 0 to code_length_max-1 because err_tol starts at 0
 [X,Y] = meshgrid(x,y);
-c = shift_range;
 figure
-surf(X,Y,shift_min_Q3);
+surf(X,Y,shift_min_Q4);
 colormap hot
 title({['Minimal shift value with false wakeup <' num2str(target_falsewkup) ' {} in an hour,'];...
     ['Missing detection rate <' num2str(target_misswkup)];...
-    ['RF on time = ' num2str(RF_ontime) '(s), Error tolerance = ' num2str(err_tol)]});
+    ['RF on time = ' num2str(RF_ontime) '(s), Code weight = ' num2str(code_weight_Q4)]});
 xlabel('Code length');
-ylabel('Number of 1s in code');
+ylabel('Error tolerance bit(s)');
 xlim([code_length_min,code_length_max]);
-ylim([1,code_length_max]);
-view(2)
-caxis([min(shift_range) max(shift_range)])
-colorbar
-
+ylim([0,floor(code_length_max*code_weight_Q4)]);
+view(2);
+caxis([min(shift_range) max(shift_range)]);
+colorbar;
+r = shift_min_Q4;
 end
