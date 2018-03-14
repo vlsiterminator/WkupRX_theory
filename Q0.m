@@ -3,7 +3,7 @@
 %4) Vtrip vs miss detection rate with given code_length, ones, err_tol_mode, err_tol
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function r=Q0(Vtrip,Vtrip_num,sigma,shift,over_samp,RF_ontime,code_length,ones_count,err_tol_mode,err_tol,err_tol_fp,err_tol_fn)
+function [r1,r2]=Q0(Vtrip,Vtrip_num,sigma,shift,over_samp,RF_ontime,code_length,ones_count,err_tol_mode,err_tol,err_tol_fp,err_tol_fn)
 
 
 %[length, number of '1's, bandwidth, variance]
@@ -87,4 +87,6 @@ end
 xlabel('Vtrip(V)');
 ylabel('Probability of missing detection');
 
+r1=code_falsewkup;
+r2=code_misswkup;
 end

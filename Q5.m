@@ -16,7 +16,8 @@ for shift = shift_range
         for err_tol = (0):(ones_count-2)
             code_bandwidth_rf = ones_count/RF_ontime;
             code_bandwidth_dig = code_bandwidth_rf*over_samp;
-            code_sigma = sqrt(code_bandwidth_rf/200)*sigma;
+%             code_sigma = sqrt(code_bandwidth_rf/200)*sigma;
+            code_sigma = sigma;
             code_pfp = 1 - Calc_CDF(Vtrip, code_sigma, 0);
             code_pfn = Calc_CDF(Vtrip, code_sigma, shift);
             %Start from the highest Vtrip, and find the range of (Vtrip_i,Vtrip_max) that

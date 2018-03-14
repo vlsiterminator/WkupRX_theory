@@ -64,5 +64,5 @@ ylim([1,code_length_max]);
 view(2)
 caxis([min(shift_range) max(shift_range)])
 colorbar
-
+r = shift_min_Q3;
 end

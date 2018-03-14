@@ -24,6 +24,7 @@ for shift = shift_range
         % Sweep error_tol_fp from 0 to code_length-ones_count-1 because
         % false wkup prob is 1 when code_length-ones <= err_tol_fp + 1 and 
         % a enveloped interference
+            err_tol_fn = 0;
             for err_tol_fp = 0:(code_length-ones_count-1)
          
                 %Start from the highest Vtrip, and find the range of (Vtrip_i,Vtrip_max) that
